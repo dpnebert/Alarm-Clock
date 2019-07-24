@@ -3,6 +3,10 @@
 #define hundredsPin   16  
 #define thousandsPin  17 
 bool hex;
+
+
+
+
 char characters[16]= {              //0 is light on, 1 is light off
                         0b00000011, //0
                         0b10011111, //1
@@ -28,7 +32,6 @@ void setup() {
 
   Serial.begin(9600);
   Serial.print("Hello, "); //for debugging
-  
   Serial.println("World");
   
   hex = true;
@@ -53,7 +56,9 @@ void loop() {
   digitalWrite(tensPin, HIGH);
   
   delay(1000);
-  
+
+  // Moves the value of the ones element
+  // 
   displayCharacter(characters[ones]);
   
   if(ones == 9)
