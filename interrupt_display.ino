@@ -7,40 +7,52 @@
  * It uses PORTB and PORTC for the display.
  * Select pins are 2, 3, 4, 5
  * 
- * TODO: Put lower nibble in PORTB and
- * upper nibble in PORTC
- * TODO: Add method for pulsing character
  */
 
 
 
 
 
-#define selectA       2
-#define selectB       3  
-#define selectC       4  
-#define selectD       5
+#define selectA       5
+#define selectB       4  
+#define selectC       3  
+#define selectD       2
 
-char characters[16]= {              //0 is light on, 1 is light off
-                        0b00000011, //0
-                        0b10011111, //1
-                        0b00100101, //2
-                        0b00001101, //3
-                        0b10011001, //4
-                        0b01001001, //5
-                        0b01000001, //6
-                        0b00011111, //7
-                        0b00000001, //8
-                        0b00011001, //9
-                        0b00010001, //A
-                        0b11000001, //B
-                        0b01100011, //C
-                        0b10000101, //D
-                        0b01100001, //E
-                        0b01110001  //F
-                        };
+/*            A
+ *          F   B
+ *            G
+ *          E   C
+ *            D
+ *                Dp
+ *          
+ *         8  7654321 
+ *      0b(Dp)GFEDCBA
+ *      
+ *      MUST MAKE BIT ZERO
+ *      TO TURN ON LED.
+ * 
+ *
+ */
+char characters[16]= { //    GFEDCBA
+                          0b11000000, //0
+                          0b11111001, //1
+                          0b10100100, //2
+                          0b10110000, //3
+                          0b10011001, //4
+                          0b10010010, //5
+                          0b10000010, //6
+                          0b11111000, //7
+                          0b10000000, //8
+                          0b10011000, //9
+                          0b10001000, //A
+                          0b10000011, //B
+                          0b11000110, //C
+                          0b10100001, //D
+                          0b10000110, //E
+                          0b10001110, //F
+                       };
 
-char LEDs[] = { selectA, selectB, selectC, selectD };
+char displays[] = { selectA, selectB, selectC, selectD };
 
 
 
@@ -57,16 +69,76 @@ void setup() {
   initTimer();
   initPorts();
   initSelectPins();
+
+  
+  
 }
 void loop() {
-  // put your main code here, to run repeatedly:
   if(flag)
-  {
-    Serial.println(count);
+  {    
     flag = false;
-    count++;
+    updatePortValues(characters[count]);
+    
+    //if incrementing....
+    if(count == 15)
+    {
+      count = 0;
+    }
+    else
+    {
+      count++;
+    }
   }
+
+  // This happens ever loop, and all it does it tell
+  // which select pin to turn on and then waits
+  // for the delay (second parameter) length of time
+  // before turn off the select pin.  When adding
+  // more select pins, we just need to track their
+  // values above in the if(flag) block, and add
+  // a method call below to do that position after
+  // the ones  
+  pulseCharacterToSelectLEDs(displays[3], 1);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ALL THE CODE BELOW HERE IS SETUP
+//
+// PLEASE DON'T CHANGE ANYTHING
+// 
+// Just read the comments
+
+// Turn the pin 'select' HIGH for the
+// delay_ms length of time, then 
+// turns 'select' back to LOW
+//
+void pulseCharacterToSelectLEDs(int select, int delay_ms)
+{
+  digitalWrite(select, HIGH);
+  delay(delay_ms);
+  digitalWrite(select, LOW);
   
+}
+
+// We give it eight bits, and this
+// method reads the lower half into
+// PORTB, and the upper in to PORTC
+//
+void updatePortValues(char character)
+{  
+  PORTB = character & 0b00001111; // lower
+  PORTC = (character >> 4); // uppper
 }
 
 
@@ -77,12 +149,12 @@ ISR(TIMER1_OVF_vect)        // interrupt service routine that wraps a user defin
 }
 void initTimer()
 {
-    // initialize timer1 
+  // initialize timer1 
   noInterrupts();           // disable all interrupts
   TCCR1A = 0;
   TCCR1B = 0;
 
-  TCNT1 = 3036;            // preload timer 65536-16MHz/256/2Hz
+  TCNT1 = 3036;            // preload timer 65536-16MHz/256/1Hz
   TCCR1B |= (1 << CS12);    //  1024prescaler 
   TIMSK1 |= (1 << TOIE1);   // enable timer overflow interrupt
   interrupts();             // enable all interrupts
@@ -93,11 +165,11 @@ void initPorts()
   DDRB = 255;
   DDRC = 255;
 
-  PORTB = 0;
-  PORTC = 0;
+  PORTB = 255;
+  PORTC = 255;
 }
 void initSelectPins()
 {
-  pinMode(selectA, OUTPUT);
-  digitalWrite(selectA, HIGH);
+  pinMode(selectD, OUTPUT);
+  digitalWrite(selectD, HIGH);
 }
