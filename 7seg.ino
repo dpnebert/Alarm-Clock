@@ -2,10 +2,6 @@
 #define tensPin       18  
 #define hundredsPin   16  
 #define thousandsPin  17 
-bool hex;
-
-
-
 
 char characters[16]= {              //0 is light on, 1 is light off
                         0b00000011, //0
@@ -24,7 +20,6 @@ char characters[16]= {              //0 is light on, 1 is light off
                         0b10000101, //D
                         0b01100001, //E
                         0b01110001  //F
-
                         };
 int ones; //time integer, seconds place
 int tens; //time integer, tens place
@@ -34,7 +29,6 @@ void setup() {
   Serial.print("Hello, "); //for debugging
   Serial.println("World");
   
-  hex = true;
   ones = 0;
   tens = 0;
   // put your setup code here, to run once:
@@ -52,24 +46,6 @@ void setup() {
 }
 void loop() {
   
-  digitalWrite(onesPin, HIGH);
-  digitalWrite(tensPin, HIGH);
-  
-  delay(1000);
-
-  // Moves the value of the ones element
-  // 
-  displayCharacter(characters[ones]);
-  
-  if(ones == 9)
-  {
-    ones = 0;
-    tens++;
-  }
-  else
-  {
-    ones++;
-  }  
 }
 void displayCharacter(char c) {
   PORTD = c;
