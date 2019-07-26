@@ -24,6 +24,9 @@
  *            D
  *                Dp
  *          
+ *          
+ *          
+ *          
  *         8  7654321 
  *      0b(Dp)GFEDCBA
  *      
@@ -144,7 +147,12 @@ ISR(TIMER1_OVF_vect)        // interrupt service routine that wraps a user defin
 }
 void initTimer()
 {
+  // http://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf
+  char cSREG;
+  cSREG = SREG; /* store SREG value */
   cli();                    // disable all interrupts
+  SREG = cSREG; /* restore SREG value (I-bit) */
+    
   TCCR1A = 0;               // Zero out the timer control
   TCCR1B = 0;               // registers
 
