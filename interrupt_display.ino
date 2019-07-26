@@ -193,7 +193,7 @@ void updatePortValues(char character)
 
 ISR(TIMER1_OVF_vect)        // interrupt service routine that wraps a user defined function supplied by attachInterrupt
 {
-  TCNT1 = Timer_one_second;            // preload timer
+  TCNT1 = tick_rate;            // preload timer
   flag = true;
 }
 void initTimer()
@@ -207,7 +207,7 @@ void initTimer()
   TCCR1A = 0;               // Zero out the timer control
   TCCR1B = 0;               // registers
 
-  TCNT1 = Timer_one_second;             // preload timer 65536-16MHz/256/1Hz
+  TCNT1 = tick_rate;             // preload timer 65536-16MHz/256/1Hz
   TCCR1B |= (1 << CS12);    // 256 prescaler 
   TIMSK1 |= (1 << TOIE1);   // enable timer overflow interrupt
   sei();                    // enable all interrupts
