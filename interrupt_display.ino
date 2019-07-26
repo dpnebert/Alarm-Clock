@@ -68,7 +68,9 @@ const char displays[] = { selectA,
                           selectB,
                           selectC,
                           selectD };
-
+                          
+const int Timer_one_second = 3036;
+int tick_rate;
 int delay_ms;
 bool flag;
 int radixCeiling;
@@ -122,9 +124,6 @@ void loop() {
     {
       thousands = 0;
     }
-    
-    //Serial.println();
-    //Serial.println();
   }
 
 }
@@ -150,6 +149,9 @@ void loop() {
 // Setup look to call all the initialization methods
 void setup() {
   Serial.begin(9600);
+  
+  tick_rate = Timer_one_second;
+  
   radixCeiling = 15;
   delay_ms = 3;
   flag = false;
@@ -191,7 +193,7 @@ void updatePortValues(char character)
 
 ISR(TIMER1_OVF_vect)        // interrupt service routine that wraps a user defined function supplied by attachInterrupt
 {
-  TCNT1 = 3036;            // preload timer
+  TCNT1 = Timer_one_second;            // preload timer
   flag = true;
 }
 void initTimer()
@@ -205,7 +207,7 @@ void initTimer()
   TCCR1A = 0;               // Zero out the timer control
   TCCR1B = 0;               // registers
 
-  TCNT1 = 3036;             // preload timer 65536-16MHz/256/1Hz
+  TCNT1 = Timer_one_second;             // preload timer 65536-16MHz/256/1Hz
   TCCR1B |= (1 << CS12);    // 256 prescaler 
   TIMSK1 |= (1 << TOIE1);   // enable timer overflow interrupt
   sei();                    // enable all interrupts
