@@ -6,12 +6,12 @@
  * 
  * It uses PORTB and PORTC for the display.
  * Four bits to the lower nibble of PORTB and
- * four bits to the upper nibble of PORTC
+ * four bits to the lower nibble of PORTC
  * Select pins are 2, 3, 4, 5
  * 
  */
 
-
+#define timerClock    6
 #define selectA       5
 #define selectB       4  
 #define selectC       3  
@@ -33,26 +33,44 @@
  *      MUST MAKE BIT ZERO
  *      TO TURN ON LED.
  */
- 
-char characters[16]= { //    GFEDCBA
-                          0b11000000, //0
-                          0b11111001, //1
-                          0b10100100, //2
-                          0b10110000, //3
-                          0b10011001, //4
-                          0b10010010, //5
-                          0b10000010, //6
-                          0b11111000, //7
-                          0b10000000, //8
-                          0b10011000, //9
-                          0b10001000, //A
-                          0b10000011, //B
-                          0b11000110, //C
-                          0b10100001, //D
-                          0b10000110, //E
-                          0b10001110, //F
-                       };
-char displays[] = { selectA, selectB, selectC, selectD };
+
+// Setting constant for one second
+// Doing math on this number can give
+// you any timer delay you want
+//
+// Set in stone for the speed of uC and
+// our prescaler value.  To get more
+// precision or ability for longer
+// delays, see calculation in initTimer()
+const uint8_t tcnt_one_second = 3036;
+
+                          //   D
+                          //   pGFEDCBA
+const char characters[16]= { 0b01000000, //0
+                             0b01111001, //1
+                             0b00100100, //2
+                             0b00110000, //3
+                             0b00011001, //4
+                             0b00010010, //5
+                             0b00000010, //6
+                             0b01111000, //7
+                             0b00000000, //8
+                             0b00011000, //9
+                             0b00001000, //A
+                             0b00000011, //B
+                             0b01000110, //C
+                             0b00100001, //D
+                             0b00000110, //E
+                             0b00001110  //F
+                           };
+                       
+const char displays[] = { selectA,
+                          selectB,
+                          selectC,
+                          selectD };
+                          
+const int Timer_one_second = 3036;
+int tick_rate;
 int delay_ms;
 bool flag;
 int radixCeiling;
@@ -64,33 +82,27 @@ int thousands;
 void loop() {  
 
   updatePortValues(characters[ones]);
-  pulseCharacterToSelectLEDs(selectD);
-
-  
+  pulseSelectLine(selectD);
+    
   updatePortValues(characters[tens]);
-  pulseCharacterToSelectLEDs(selectC);
-  
+  pulseSelectLine(selectC);  
   
   updatePortValues(characters[hundreds]);
-  pulseCharacterToSelectLEDs(selectB);
-  
+  pulseSelectLine(selectB);  
   
   updatePortValues(characters[thousands]);
-  pulseCharacterToSelectLEDs(selectA);
-
+  pulseSelectLine(selectA);
   
   if(flag)
   { 
-    // toggle pin for scope to see clock
-    //PORTD ^= 0b00001000; 
+    // toggle pin for scope to see
+    // the timer's clock
+    PORTD ^= 0b01000000; 
     
     flag = false;
-    //Serial.print("Ones: ");
-    //Serial.println(ones);
+    
     if(ones == radixCeiling)
     {
-      
-      //Serial.println("INCREMENT ONES");
       ones = 0;
       tens++;
     }
@@ -98,11 +110,8 @@ void loop() {
     {
       ones++;
     }
-    //Serial.print("Tens: ");
-    //Serial.println(tens);
     if(tens == radixCeiling)
     {
-      //Serial.println("INCREMENT TENS");
       tens = 0;
       hundreds++;
     }
@@ -115,9 +124,6 @@ void loop() {
     {
       thousands = 0;
     }
-    
-    //Serial.println();
-    //Serial.println();
   }
 
 }
@@ -143,6 +149,9 @@ void loop() {
 // Setup look to call all the initialization methods
 void setup() {
   Serial.begin(9600);
+  
+  tick_rate = Timer_one_second;
+  
   radixCeiling = 15;
   delay_ms = 3;
   flag = false;
@@ -150,6 +159,9 @@ void setup() {
   tens = 0;
   hundreds = 0;
   thousands = 0;
+
+  pinMode(timerClock, OUTPUT);
+  digitalWrite(timerClock, LOW);
   
   initTimer();
   initPorts();
@@ -162,7 +174,7 @@ void setup() {
 // delay_ms length of time, then 
 // turns 'select' back to LOW
 //
-void pulseCharacterToSelectLEDs(int select)
+void pulseSelectLine(int select)
 {
   digitalWrite(select, HIGH);
   delay(delay_ms);
@@ -181,7 +193,7 @@ void updatePortValues(char character)
 
 ISR(TIMER1_OVF_vect)        // interrupt service routine that wraps a user defined function supplied by attachInterrupt
 {
-  TCNT1 = 3036;            // preload timer
+  TCNT1 = tick_rate;            // preload timer
   flag = true;
 }
 void initTimer()
@@ -195,7 +207,7 @@ void initTimer()
   TCCR1A = 0;               // Zero out the timer control
   TCCR1B = 0;               // registers
 
-  TCNT1 = 3036;             // preload timer 65536-16MHz/256/1Hz
+  TCNT1 = tick_rate;             // preload timer 65536-16MHz/256/1Hz
   TCCR1B |= (1 << CS12);    // 256 prescaler 
   TIMSK1 |= (1 << TOIE1);   // enable timer overflow interrupt
   sei();                    // enable all interrupts
