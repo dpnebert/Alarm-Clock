@@ -55,36 +55,71 @@ char characters[16]= { //    GFEDCBA
 char displays[] = { selectA, selectB, selectC, selectD };
 int delay_ms;
 bool flag;
-int count;
+int radixCeiling;
+int ones;
+int tens;
+int hundreds;
+int thousands;
 
-void loop() {
+void loop() {  
+
+  updatePortValues(characters[ones]);
+  pulseCharacterToSelectLEDs(selectD);
+
+  
+  updatePortValues(characters[tens]);
+  pulseCharacterToSelectLEDs(selectC);
+  
+  
+  updatePortValues(characters[hundreds]);
+  pulseCharacterToSelectLEDs(selectB);
+  
+  
+  updatePortValues(characters[thousands]);
+  pulseCharacterToSelectLEDs(selectA);
+
+  
   if(flag)
   { 
     // toggle pin for scope to see clock
     //PORTD ^= 0b00001000; 
     
     flag = false;
-    updatePortValues(characters[count]);
-    
-    //if incrementing....
-    if(count == 15)
+    //Serial.print("Ones: ");
+    //Serial.println(ones);
+    if(ones == radixCeiling)
     {
-      count = 0;
+      
+      //Serial.println("INCREMENT ONES");
+      ones = 0;
+      tens++;
     }
     else
     {
-      count++;
+      ones++;
     }
+    //Serial.print("Tens: ");
+    //Serial.println(tens);
+    if(tens == radixCeiling)
+    {
+      //Serial.println("INCREMENT TENS");
+      tens = 0;
+      hundreds++;
+    }
+    if(hundreds == radixCeiling)
+    {
+      hundreds = 0;
+      thousands++;
+    }
+    if(thousands == radixCeiling)
+    {
+      thousands = 0;
+    }
+    
+    //Serial.println();
+    //Serial.println();
   }
 
-  // This happens ever loop, and all it does it tell
-  // which select pin to turn on and then waits
-  // for a length of time before turn off the select
-  // pin.  When adding more select pins, we just
-  // need to track their values above in the if(flag)
-  // block, and add a method call below to do that
-  // position after the ones  
-  pulseCharacterToSelectLEDs(displays[3]);
 }
 
 
@@ -108,10 +143,14 @@ void loop() {
 // Setup look to call all the initialization methods
 void setup() {
   Serial.begin(9600);
-  delay_ms = 1;
+  radixCeiling = 15;
+  delay_ms = 3;
   flag = false;
-  count = 0;
-
+  ones = 0;
+  tens = 0;
+  hundreds = 0;
+  thousands = 0;
+  
   initTimer();
   initPorts();
   initSelectPins();  
@@ -169,9 +208,16 @@ void initPorts()
 
   PORTB = 255;
   PORTC = 255;
+
 }
 void initSelectPins()
 {
   pinMode(selectD, OUTPUT);
-  digitalWrite(selectD, HIGH);
+  digitalWrite(selectD, LOW);
+  pinMode(selectC, OUTPUT);
+  digitalWrite(selectC, LOW);
+  pinMode(selectB, OUTPUT);
+  digitalWrite(selectB, LOW);
+  pinMode(selectA, OUTPUT);
+  digitalWrite(selectA, LOW);
 }
