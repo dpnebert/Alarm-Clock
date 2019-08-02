@@ -10,12 +10,15 @@
  * Select pins are 2, 3, 4, 5
  * 
  */
-
-#define timerClock    6
+// Can't be used with buttons
+//#define timerClock    6
 #define selectA       5
 #define selectB       4  
 #define selectC       3  
 #define selectD       2
+
+#define inputPinA     6
+#define inputPinB     7
 
 /*            A
  *          F   B
@@ -38,11 +41,15 @@
 // Doing math on this number can give
 // you any timer delay you want
 //
-// Set in stone for the speed of uC and
-// our prescaler value.  To get more
-// precision or ability for longer
-// delays, see calculation in initTimer()
+// The timer delay is calculated using
+// the speed of the microcontroller
+// and the programmed prescaler.
+// To get more precision or ability
+// for longer delays, modify formula:
+// 3036 = 65536 - (16MHz/256/1Hz)
+// http://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf
 const uint8_t tcnt_one_second = 3036;
+
 
                           //   D
                           //   pGFEDCBA
@@ -68,6 +75,8 @@ const char displays[] = { selectA,
                           selectB,
                           selectC,
                           selectD };
+
+const char inputButtons[] = { inputPinA, inputPinB };
                           
 const int Timer_one_second = 3036;
 int tick_rate;
@@ -75,12 +84,14 @@ int delay_ms;
 bool flag;
 int radixCeiling;
 int ones;
+bool onesDecimal;
 int tens;
 int hundreds;
 int thousands;
-
+int incrementDir;
+bool counting;
 void loop() {  
-
+  
   updatePortValues(characters[ones]);
   pulseSelectLine(selectD);
     
@@ -89,10 +100,14 @@ void loop() {
   
   updatePortValues(characters[hundreds]);
   pulseSelectLine(selectB);  
+
+  if(thousands != 0)
+  {
+    updatePortValues(characters[thousands]);
+    pulseSelectLine(selectA);
+  }
   
-  updatePortValues(characters[thousands]);
-  pulseSelectLine(selectA);
-  
+
   if(flag)
   { 
     // toggle pin for scope to see
@@ -100,8 +115,32 @@ void loop() {
     PORTD ^= 0b01000000; 
     
     flag = false;
-    
-    if(ones == radixCeiling)
+    if(counting == true && incrementDir = 1)
+    {
+      incrementDisplay(&ones, &tens, &hundreds, &thousands);    
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void incrementDisplay(int *ones, int *tens, int *hundreds, int *thousands)
+{
+  if(ones == radixCeiling)
     {
       ones = 0;
       tens++;
@@ -124,20 +163,7 @@ void loop() {
     {
       thousands = 0;
     }
-  }
-
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 // ALL THE CODE BELOW HERE IS SETUP
@@ -156,16 +182,20 @@ void setup() {
   delay_ms = 3;
   flag = false;
   ones = 0;
+  onesDecimal = true;
   tens = 0;
   hundreds = 0;
   thousands = 0;
+  incrementDir = 1;
+  counting = true;
 
-  pinMode(timerClock, OUTPUT);
-  digitalWrite(timerClock, LOW);
+  //pinMode(timerClock, OUTPUT);
+  //digitalWrite(timerClock, LOW);
   
   initTimer();
   initPorts();
   initSelectPins();  
+  initButtons();
 }
 
 
@@ -232,4 +262,11 @@ void initSelectPins()
   digitalWrite(selectB, LOW);
   pinMode(selectA, OUTPUT);
   digitalWrite(selectA, LOW);
+}
+void initButtons()
+{
+  pinMode(inputButtons[0], OUTPUT);
+  digitalWrite(inputButtons[0], LOW);
+  pinMode(inputButtons[1], OUTPUT);
+  digitalWrite(inputButtons[1], LOW);
 }
