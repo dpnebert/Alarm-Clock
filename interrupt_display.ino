@@ -113,9 +113,10 @@ void loop() {
     // toggle pin for scope to see
     // the timer's clock
     PORTD ^= 0b01000000; 
+
     
     flag = false;
-    if(counting == true && incrementDir = 1)
+    if(counting == true && incrementDir == 1)
     {
       incrementDisplay(&ones, &tens, &hundreds, &thousands);    
     }
@@ -269,4 +270,13 @@ void initButtons()
   digitalWrite(inputButtons[0], LOW);
   pinMode(inputButtons[1], OUTPUT);
   digitalWrite(inputButtons[1], LOW);
+}
+
+void setNumber(int o, int te, int h, int th)
+{
+  ones = o;
+  tens = te;
+  hundreds = h;
+  thousands = th;
+  flag = true;
 }
