@@ -53,22 +53,22 @@ const uint8_t tcnt_one_second = 3036;
 
                           //   D
                           //   pGFEDCBA
-const char characters[16]= { 0b01000000, //0
-                             0b01111001, //1
-                             0b00100100, //2
-                             0b00110000, //3
-                             0b00011001, //4
-                             0b00010010, //5
-                             0b00000010, //6
-                             0b01111000, //7
-                             0b00000000, //8
-                             0b00011000, //9
-                             0b00001000, //A
-                             0b00000011, //B
-                             0b01000110, //C
-                             0b00100001, //D
-                             0b00000110, //E
-                             0b00001110  //F
+const char characters[16]= { 0b11000000, //0
+                             0b11111001, //1
+                             0b10100100, //2
+                             0b10110000, //3
+                             0b10011001, //4
+                             0b10010010, //5
+                             0b10000010, //6
+                             0b11111000, //7
+                             0b10000000, //8
+                             0b10011000, //9
+                             0b10001000, //A
+                             0b10000011, //B
+                             0b11000110, //C
+                             0b10100001, //D
+                             0b10000110, //E
+                             0b10001110  //F
                            };
                        
 const char displays[] = { selectA,
@@ -94,12 +94,18 @@ void loop() {
   
   updatePortValues(characters[ones]);
   pulseSelectLine(selectD);
-    
-  updatePortValues(characters[tens]);
-  pulseSelectLine(selectC);  
+   
+  if(tens != 0)
+  { 
+    updatePortValues(characters[tens]);
+    pulseSelectLine(selectC);  
+  }
   
-  updatePortValues(characters[hundreds]);
-  pulseSelectLine(selectB);  
+  if(hundreds != 0)
+  {
+    updatePortValues(characters[hundreds]);
+    pulseSelectLine(selectB);  
+  }
 
   if(thousands != 0)
   {
@@ -116,9 +122,28 @@ void loop() {
 
     
     flag = false;
-    if(counting == true && incrementDir == 1)
+      if(ones == radixCeiling)
     {
-      incrementDisplay(&ones, &tens, &hundreds, &thousands);    
+      ones = 0;
+      tens++;
+    }
+    else
+    {
+      ones++;
+    }
+    if(tens == radixCeiling)
+    {
+      tens = 0;
+      hundreds++;
+    }
+    if(hundreds == radixCeiling)
+    {
+      hundreds = 0;
+      thousands++;
+    }
+    if(thousands == radixCeiling)
+    {
+      thousands = 0;
     }
   }
 }
