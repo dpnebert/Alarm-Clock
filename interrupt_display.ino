@@ -90,24 +90,29 @@ int hundreds;
 int thousands;
 int incrementDir;
 bool counting;
+
+//char command;
+
+
+
 void loop() {  
   
   updatePortValues(characters[ones]);
   pulseSelectLine(selectD);
    
-  if(tens != 0)
+  if((tens != 0) || (hundreds > 0 || thousands > 0))
   { 
     updatePortValues(characters[tens]);
     pulseSelectLine(selectC);  
   }
   
-  if(hundreds != 0)
+  if((hundreds > 0) || thousands > 0)
   {
     updatePortValues(characters[hundreds]);
     pulseSelectLine(selectB);  
   }
 
-  if(thousands != 0)
+  if(thousands > 0)
   {
     updatePortValues(characters[thousands]);
     pulseSelectLine(selectA);
