@@ -358,6 +358,44 @@ void setNumber(int o, int te, int h, int th)
 
 //Aqeel's code
 
+void portSequence()
+  {
+    digitalWrite(8, HIGH);
+    delay(delaytime);
+    digitalWrite(9, HIGH);
+    delay(delaytime);
+    digitalWrite(10, HIGH);
+    delay(delaytime);
+    delay(delaytime);
+    digitalWrite(11, HIGH);
+    delay(delaytime);
+    digitalWrite(14, HIGH);
+    delay(delaytime);
+    digitalWrite(15, HIGH);
+    delay(delaytime);
+    digitalWrite(16, HIGH);
+    delay(delaytime);
+    digitalWrite(17, HIGH);
+    delay(delaytime);
+    
+    digitalWrite(8, LOW);
+    delay(delaytime);
+    digitalWrite(9, LOW);
+    delay(delaytime);
+    digitalWrite(10, LOW);
+    delay(delaytime);
+    digitalWrite(11, LOW);
+    delay(delaytime);
+    digitalWrite(14, LOW);
+    delay(delaytime);
+    digitalWrite(15, LOW);
+    delay(delaytime);
+    digitalWrite(16, LOW);
+    delay(delaytime);
+    digitalWrite(17, LOW);
+    delay(delaytime);
+  }
+
 void sequenceOn()
 {
   state = digitalRead(push1);  // read input value
