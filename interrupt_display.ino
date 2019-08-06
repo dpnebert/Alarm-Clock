@@ -20,6 +20,13 @@
 #define inputPinA     6
 #define inputPinB     7
 
+#define INC_MODE      0
+#define DEC_MODE      1
+#define DIA_MODE      2
+#define INT_MODE      3
+int MODE = 0;
+
+
 /*            A
  *          F   B
  *            G
@@ -91,72 +98,92 @@ int thousands;
 int incrementDir;
 bool counting;
 
-//char command;
-
 
 
 void loop() {  
-  
-  updatePortValues(characters[ones]);
-  pulseSelectLine(selectD);
-   
-  if((tens != 0) || (hundreds > 0 || thousands > 0))
-  { 
-    updatePortValues(characters[tens]);
-    pulseSelectLine(selectC);  
-  }
-  
-  if((hundreds > 0) || thousands > 0)
+  if(MODE == INC_MODE)
   {
-    updatePortValues(characters[hundreds]);
-    pulseSelectLine(selectB);  
-  }
-
-  if(thousands > 0)
-  {
-    updatePortValues(characters[thousands]);
-    pulseSelectLine(selectA);
-  }
+    updatePortValues(characters[ones]);
+    pulseSelectLine(selectD);
+     
+    if((tens != 0) || (hundreds > 0 || thousands > 0))
+    { 
+      updatePortValues(characters[tens]);
+      pulseSelectLine(selectC);  
+    }
+    
+    if((hundreds > 0) || thousands > 0)
+    {
+      updatePortValues(characters[hundreds]);
+      pulseSelectLine(selectB);  
+    }
   
-
-  if(flag)
-  { 
-    // toggle pin for scope to see
-    // the timer's clock
-    PORTD ^= 0b01000000; 
+    if(thousands > 0)
+    {
+      updatePortValues(characters[thousands]);
+      pulseSelectLine(selectA);
+    }
+    
+  
+    if(flag)
+    { 
+      // toggle pin for scope to see
+      // the timer's clock
+      PORTD ^= 0b01000000; 
+  
+      
+      flag = false;
 
     
-    flag = false;
       if(ones == radixCeiling)
-    {
-      ones = 0;
-      tens++;
+      {
+        ones = 0;
+        tens++;
+      }
+      else
+      {
+        ones++;
+      }
+      if(tens == radixCeiling)
+      {
+        tens = 0;
+        hundreds++;
+      }
+      if(hundreds == radixCeiling)
+      {
+        hundreds = 0;
+        thousands++;
+      }
+      if(thousands == radixCeiling)
+      {
+        thousands = 0;
+      }
     }
-    else
+  }
+  else if(MODE == DEC_MODE)
+  {
+    
+  }
+  else if(MODE == DIA_MODE)
+  {
+    
+  }
+  else if(MODE == INT_MODE)
+  {
+    if(Serial.available())
     {
-      ones++;
-    }
-    if(tens == radixCeiling)
-    {
-      tens = 0;
-      hundreds++;
-    }
-    if(hundreds == radixCeiling)
-    {
-      hundreds = 0;
-      thousands++;
-    }
-    if(thousands == radixCeiling)
-    {
-      thousands = 0;
+      if(command == 33)
+      {
+       digitalWrite(7, !digitalRead(7));
+      }
     }
   }
 }
 
-
-
-
-
+void button1()
+{
+  
+}
 
 
 
@@ -206,6 +233,10 @@ void incrementDisplay(int *ones, int *tens, int *hundreds, int *thousands)
 // Setup look to call all the initialization methods
 void setup() {
   Serial.begin(9600);
+  while(!Serial){}
+
+  pinMode(7, OUTPUT);
+  digitalWrite(7, LOW);
   
   tick_rate = Timer_one_second;
   
@@ -223,10 +254,13 @@ void setup() {
   //pinMode(timerClock, OUTPUT);
   //digitalWrite(timerClock, LOW);
   
-  initTimer();
   initPorts();
   initSelectPins();  
   initButtons();
+  initButtonInterrupts();
+
+  // Last due to it enables global interrupts at the end
+  initTimer();
 }
 
 
@@ -295,13 +329,16 @@ void initSelectPins()
   digitalWrite(selectA, LOW);
 }
 void initButtons()
-{
+{ 
   pinMode(inputButtons[0], OUTPUT);
   digitalWrite(inputButtons[0], LOW);
   pinMode(inputButtons[1], OUTPUT);
   digitalWrite(inputButtons[1], LOW);
 }
-
+void initButtonInterrupts()
+{
+  attachInterrupt(digitalPinToInterrupt(2), button1, RISING);
+}
 void setNumber(int o, int te, int h, int th)
 {
   ones = o;
@@ -309,4 +346,8 @@ void setNumber(int o, int te, int h, int th)
   hundreds = h;
   thousands = th;
   flag = true;
+}
+void doStuff()
+{
+  
 }
