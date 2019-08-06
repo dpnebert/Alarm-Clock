@@ -401,20 +401,10 @@ void sequenceOn()
   state = digitalRead(push1);  // read input value
   if (state == HIGH)
   {
-    digitalWrite(L1, LOW); //turining all digits off
-    digitalWrite(L2, LOW);
-    digitalWrite(L3, LOW);
-    digitalWrite(L4, LOW);
-    for (int i = 6 ; i < 16 ; i++)
-    {
-      digitalWrite(i, HIGH);
-      delay(delaytime);
-    }
+   
+      selectPinsOff();
+      portSequence();
 
-    for (int i = 6 ; i < 16 ; i++)
-    {
-      digitalWrite(i, LOW);
-      delay(delaytime);
     }
   }
 }
