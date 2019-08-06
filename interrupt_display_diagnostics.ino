@@ -24,7 +24,14 @@
 #define DEC_MODE      1
 #define DIA_MODE      2
 #define INT_MODE      3
-int MODE = 0;
+int MODE = 2;
+
+//Aqeel's varialbles
+
+int state = 0;
+int push1 = 14;
+int push2 = 15;
+int push3 = 16;
 
 
 /*            A
@@ -166,12 +173,24 @@ void loop() {
   }
   else if(MODE == DIA_MODE)
   {
+    if(Serial.available())
+    {
+      char command = Serial.read();
+      if(command == 33)
+      {
+        
+        PORTD ^= 0b10000000; 
+       sequenceOn();
+      }
+    }
     
   }
   else if(MODE == INT_MODE)
   {
+    
     if(Serial.available())
     {
+      char command = Serial.read();
       if(command == 33)
       {
        digitalWrite(7, !digitalRead(7));
@@ -320,13 +339,24 @@ void initPorts()
 void initSelectPins()
 {
   pinMode(selectD, OUTPUT);
-  digitalWrite(selectD, LOW);
   pinMode(selectC, OUTPUT);
-  digitalWrite(selectC, LOW);
   pinMode(selectB, OUTPUT);
-  digitalWrite(selectB, LOW);
   pinMode(selectA, OUTPUT);
+  selectPinsOff();
+}
+void selectPinsOff()
+{
+  digitalWrite(selectD, LOW);
+  digitalWrite(selectC, LOW);
+  digitalWrite(selectB, LOW);
   digitalWrite(selectA, LOW);
+}
+void selectPinsOn()
+{
+  digitalWrite(selectD, HIGH);
+  digitalWrite(selectC, HIGH);
+  digitalWrite(selectB, HIGH);
+  digitalWrite(selectA, HIGH);
 }
 void initButtons()
 { 
@@ -347,7 +377,52 @@ void setNumber(int o, int te, int h, int th)
   thousands = th;
   flag = true;
 }
-void doStuff()
+
+
+//Aqeel's code
+
+void portSequence()
+  {
+    int delaytime = 500;
+    digitalWrite(8, HIGH);
+    delay(delaytime);
+    digitalWrite(9, HIGH);
+    delay(delaytime);
+    digitalWrite(10, HIGH);
+    delay(delaytime);
+    delay(delaytime);
+    digitalWrite(11, HIGH);
+    delay(delaytime);
+    digitalWrite(14, HIGH);
+    delay(delaytime);
+    digitalWrite(15, HIGH);
+    delay(delaytime);
+    digitalWrite(16, HIGH);
+    delay(delaytime);
+    digitalWrite(17, HIGH);
+    delay(delaytime);
+    
+    digitalWrite(8, LOW);
+    delay(delaytime);
+    digitalWrite(9, LOW);
+    delay(delaytime);
+    digitalWrite(10, LOW);
+    delay(delaytime);
+    digitalWrite(11, LOW);
+    delay(delaytime);
+    digitalWrite(14, LOW);
+    delay(delaytime);
+    digitalWrite(15, LOW);
+    delay(delaytime);
+    digitalWrite(16, LOW);
+    delay(delaytime);
+    digitalWrite(17, LOW);
+    delay(delaytime);
+  }
+
+void sequenceOn()
 {
-  
+  selectPinsOn();
+  portSequence();
+  selectPinsOff();
 }
